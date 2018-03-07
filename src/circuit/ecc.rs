@@ -54,9 +54,9 @@ pub fn fixed_base_multiplication<E, CS>(
                                   .zip(params.circuit_generators(base).iter())
                                   .enumerate()
     {
-        let chunk_a = chunk.get(0).map(|e| e.clone()).unwrap_or(Boolean::constant(false));
-        let chunk_b = chunk.get(1).map(|e| e.clone()).unwrap_or(Boolean::constant(false));
-        let chunk_c = chunk.get(2).map(|e| e.clone()).unwrap_or(Boolean::constant(false));
+        let chunk_a = chunk.get(0).cloned().unwrap_or(Boolean::constant(false));
+        let chunk_b = chunk.get(1).cloned().unwrap_or(Boolean::constant(false));
+        let chunk_c = chunk.get(2).cloned().unwrap_or(Boolean::constant(false));
 
         let (x, y) = lookup3_xy(
             cs.namespace(|| format!("window table lookup {}", i)),
@@ -64,10 +64,7 @@ pub fn fixed_base_multiplication<E, CS>(
             window
         )?;
 
-        let p = EdwardsPoint {
-            x: x,
-            y: y
-        };
+        let p = EdwardsPoint { x, y };
 
         if result.is_none() {
             result = Some(p);
@@ -648,10 +645,7 @@ impl<E: JubjubEngine> MontgomeryPoint<E> {
         y: Num<E>
     ) -> Self
     {
-        MontgomeryPoint {
-            x: x,
-            y: y
-        }
+        MontgomeryPoint { x, y }
     }
 
     /// Performs an affine point addition, not defined for
@@ -775,7 +769,7 @@ mod test {
 
     #[test]
     fn test_into_edwards() {
-        let params = &JubjubBls12::new();
+        let params = &JubjubBls12::default();
         let rng = &mut XorShiftRng::from_seed([0x3dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
 
         for _ in 0..100 {
@@ -814,7 +808,7 @@ mod test {
 
     #[test]
     fn test_interpret() {
-        let params = &JubjubBls12::new();
+        let params = &JubjubBls12::default();
         let rng = &mut XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
 
         for _ in 0..100 {
@@ -874,7 +868,7 @@ mod test {
 
     #[test]
     fn test_edwards_fixed_base_multiplication()  {
-        let params = &JubjubBls12::new();
+        let params = &JubjubBls12::default();
         let rng = &mut XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
 
         for _ in 0..100 {
@@ -909,7 +903,7 @@ mod test {
 
     #[test]
     fn test_edwards_multiplication() {
-        let params = &JubjubBls12::new();
+        let params = &JubjubBls12::default();
         let rng = &mut XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
 
         for _ in 0..100 {
@@ -966,7 +960,7 @@ mod test {
 
     #[test]
     fn test_conditionally_select() {
-        let params = &JubjubBls12::new();
+        let params = &JubjubBls12::default();
         let rng = &mut XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
 
         for _ in 0..1000 {
@@ -1032,7 +1026,7 @@ mod test {
 
     #[test]
     fn test_edwards_addition() {
-        let params = &JubjubBls12::new();
+        let params = &JubjubBls12::default();
         let rng = &mut XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
 
         for _ in 0..100 {
@@ -1100,7 +1094,7 @@ mod test {
 
     #[test]
     fn test_edwards_doubling() {
-        let params = &JubjubBls12::new();
+        let params = &JubjubBls12::default();
         let rng = &mut XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
 
         for _ in 0..100 {
@@ -1135,7 +1129,7 @@ mod test {
 
     #[test]
     fn test_montgomery_addition() {
-        let params = &JubjubBls12::new();
+        let params = &JubjubBls12::default();
         let rng = &mut XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
 
         for _ in 0..100 {

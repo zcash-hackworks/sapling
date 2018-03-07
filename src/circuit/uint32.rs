@@ -32,17 +32,12 @@ impl UInt32 {
 
         let mut tmp = value;
         for _ in 0..32 {
-            if tmp & 1 == 1 {
-                bits.push(Boolean::constant(true))
-            } else {
-                bits.push(Boolean::constant(false))
-            }
-
+            bits.push(Boolean::constant(tmp & 1 == 1));
             tmp >>= 1;
         }
 
         UInt32 {
-            bits: bits,
+            bits,
             value: Some(value)
         }
     }
@@ -80,8 +75,8 @@ impl UInt32 {
                          .collect::<Result<Vec<_>, SynthesisError>>()?;
 
         Ok(UInt32 {
-            bits: bits,
-            value: value
+            bits,
+            value
         })
     }
 
@@ -108,20 +103,20 @@ impl UInt32 {
         for b in new_bits.iter().rev() {
             value.as_mut().map(|v| *v <<= 1);
 
-            match b {
-                &Boolean::Constant(b) => {
+            match *b {
+                Boolean::Constant(b) => {
                     if b {
                         value.as_mut().map(|v| *v |= 1);
                     }
                 },
-                &Boolean::Is(ref b) => {
+                Boolean::Is(ref b) => {
                     match b.get_value() {
                         Some(true) => { value.as_mut().map(|v| *v |= 1); },
                         Some(false) => {},
                         None => { value = None }
                     }
                 },
-                &Boolean::Not(ref b) => {
+                Boolean::Not(ref b) => {
                     match b.get_value() {
                         Some(false) => { value.as_mut().map(|v| *v |= 1); },
                         Some(true) => {},
@@ -132,7 +127,7 @@ impl UInt32 {
         }
 
         UInt32 {
-            value: value,
+            value,
             bits: new_bits
         }
     }
@@ -182,7 +177,7 @@ impl UInt32 {
                             .collect::<Result<_, _>>()?;
 
         Ok(UInt32 {
-            bits: bits,
+            bits,
             value: new_value
         })
     }
@@ -203,6 +198,7 @@ impl UInt32 {
 
         // Compute the maximum value of the sum so we allocate enough bits for
         // the result
+        #[cfg_attr(feature = "clippy", allow(cast_lossless))]
         let mut max_value = (operands.len() as u64) * (u32::max_value() as u64);
 
         // Keep track of the resulting value
@@ -218,7 +214,7 @@ impl UInt32 {
             // Accumulate the value
             match op.value {
                 Some(val) => {
-                    result_value.as_mut().map(|v| *v += val as u64);
+                    result_value.as_mut().map(|v| *v += u64::from(val));
                 },
                 None => {
                     // If any of our operands have unknown value, we won't
@@ -231,20 +227,20 @@ impl UInt32 {
             // the linear combination
             let mut coeff = E::Fr::one();
             for bit in &op.bits {
-                match bit {
-                    &Boolean::Is(ref bit) => {
+                match *bit {
+                    Boolean::Is(ref bit) => {
                         all_constants = false;
 
                         // Add coeff * bit
                         lc = lc + (coeff, bit.get_variable());
                     },
-                    &Boolean::Not(ref bit) => {
+                    Boolean::Not(ref bit) => {
                         all_constants = false;
 
                         // Add coeff * (1 - bit) = coeff * ONE - coeff * bit
                         lc = lc + (coeff, CS::one()) - (coeff, bit.get_variable());
                     },
-                    &Boolean::Constant(bit) => {
+                    Boolean::Constant(bit) => {
                         if bit {
                             lc = lc + (coeff, CS::one());
                         }
@@ -372,14 +368,14 @@ mod test {
             assert!(r.value == Some(expected));
 
             for b in r.bits.iter() {
-                match b {
-                    &Boolean::Is(ref b) => {
+                match *b {
+                    Boolean::Is(ref b) => {
                         assert!(b.get_value().unwrap() == (expected & 1 == 1));
                     },
-                    &Boolean::Not(ref b) => {
+                    Boolean::Not(ref b) => {
                         assert!(!b.get_value().unwrap() == (expected & 1 == 1));
                     },
-                    &Boolean::Constant(b) => {
+                    Boolean::Constant(b) => {
                         assert!(b == (expected & 1 == 1));
                     }
                 }

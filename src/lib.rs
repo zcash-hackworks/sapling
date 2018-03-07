@@ -1,3 +1,18 @@
+// `clippy` is a code linting tool for improving code quality by catching
+// common mistakes or strange code patterns. If the `clippy` feature is
+// provided, it is enabled and all compiler warnings are prohibited.
+#![cfg_attr(feature = "clippy", deny(warnings))]
+#![cfg_attr(feature = "clippy", feature(plugin))]
+#![cfg_attr(feature = "clippy", plugin(clippy))]
+#![cfg_attr(feature = "clippy", allow(const_static_lifetime))]
+#![cfg_attr(feature = "clippy", allow(inline_always))]
+#![cfg_attr(feature = "clippy", allow(many_single_char_names))]
+#![cfg_attr(feature = "clippy", allow(or_fun_call))]
+#![cfg_attr(feature = "clippy", allow(too_many_arguments))]
+#![cfg_attr(feature = "clippy", allow(type_complexity))]
+#![cfg_attr(feature = "clippy", allow(unreadable_literal))]
+#![cfg_attr(feature = "clippy", allow(wrong_self_convention))]
+
 extern crate pairing;
 extern crate bellman;
 extern crate blake2_rfc;
